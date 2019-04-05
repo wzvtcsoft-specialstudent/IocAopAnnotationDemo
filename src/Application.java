@@ -5,11 +5,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Application {
     public static void main(String[] args) {
-       // XController xc=new XController();
-        XController xc=(XController)Application.getContext().get("XController");
+        XController xc=(XController)Application.getContext().get("test.XController");
 
         int sum=xc.add(3,5);
-        System.out.println(sum);
+        System.out.println(sum==8);//此处应该输出true
 
     }
 
