@@ -2,6 +2,7 @@ import test.XController;
 
 import java.io.File;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +13,11 @@ public class Application {
     public static void main(String[] args) {
        // XController xc=new XController();
         scanElements("test");
+        List<Field> fields=findFieldsInClassWithAnnotation(XController.class,Deprecated.class);
+        for(Field f:fields){
+            //输出该字段的类型
+            System.out.println(f.getType());
+        }
 
       /*  XController xc=(XController)Application.getContext().get("XController");
 
@@ -66,5 +72,23 @@ public class Application {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 查找指定类里带有指定注解的字段～
+     * @param targetClazz
+     * @param annotationClazz
+     * @return
+     */
+    static public List<Field> findFieldsInClassWithAnnotation(Class targetClazz,Class annotationClazz){
+         List<Field> fields=new ArrayList<>();
+        for(Field field  : targetClazz.getDeclaredFields())
+        {
+            if (field.isAnnotationPresent(annotationClazz))
+            {
+                fields.add(field);
+            }
+        }
+        return fields;
     }
 }

@@ -3,7 +3,7 @@ package test;
 //TODO @Component 方案2
 public class XController {
 
-    //TODO 方案2 @Autowired
+    @Deprecated
     private XService xService=new XService();
 
     public int add(int a, int b) {
