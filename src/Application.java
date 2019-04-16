@@ -1,4 +1,6 @@
+import test.Component;
 import test.XController;
+import test.XService;
 
 import java.io.File;
 import java.lang.annotation.Annotation;
@@ -11,19 +13,31 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Application {
     public static void main(String[] args) {
-       // XController xc=new XController();
+        Object xs=null;
         scanElements("test");
-        List<Field> fields=findFieldsInClassWithAnnotation(XController.class,Deprecated.class);
+        List<Field> fields=findFieldsInClassWithAnnotation(XController.class, Component.class);
         for(Field f:fields){
             //输出该字段的类型
-            System.out.println(f.getType());
+//            System.out.println(f.getName());
+//            listStr.add(f.getName());
+//            try {
+//                xs= Class.forName("test."+f.getName()).newInstance();
+//            } catch (InstantiationException e) {
+//                e.printStackTrace();
+//            } catch (IllegalAccessException e) {
+//                e.printStackTrace();
+//            } catch (ClassNotFoundException e) {
+//                e.printStackTrace();
+//            }
+
         }
 
-      /*  XController xc=(XController)Application.getContext().get("XController");
+
+       XController xc=(XController)Application.getContext().get("XController");
 
         int sum=xc.add(3,5);
         System.out.println(sum);
-        */
+
 
     }
 
@@ -84,6 +98,7 @@ public class Application {
          List<Field> fields=new ArrayList<>();
         for(Field field  : targetClazz.getDeclaredFields())
         {
+
             if (field.isAnnotationPresent(annotationClazz))
             {
                 fields.add(field);
