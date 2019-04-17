@@ -7,47 +7,47 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Application {
+
+    static Map<String ,Object>map=new HashMap<>();
+
     public static void main(String[] args) {
-        Object xs=null;
-        scanElements("test");
+        //TODO IMPL 遍历所有装载的Class，找到有@Component的类。
+        scanElements("test","ss");
+
         List<Field> fields=findFieldsInClassWithAnnotation(XController.class, Component.class);
         for(Field f:fields){
             //输出该字段的类型
-//            System.out.println(f.getName());
-//            listStr.add(f.getName());
-//            try {
-//                xs= Class.forName("test."+f.getName()).newInstance();
-//            } catch (InstantiationException e) {
-//                e.printStackTrace();
-//            } catch (IllegalAccessException e) {
-//                e.printStackTrace();
-//            } catch (ClassNotFoundException e) {
-//                e.printStackTrace();
-//            }
+            System.out.println(f.getName());
 
         }
+//        System.out.println(fields);
 
 
-       XController xc=(XController)Application.getContext().get("XController");
+/*       XController xc=(XController)Application.getContext().get("XController");
 
         int sum=xc.add(3,5);
         System.out.println(sum);
-
+*/
 
     }
 
     private static Map<String,Object> getContext() {
         //TODO 1.遍历所有装载的Class，找到有@Component的类。
+            scanElements("test","");
+
         //TODO 2.实例化他们并放到一个Map中。
+
         //TODO 3.检查所有的实例化类，看看他们是否有@Autowired属性，
+
         //TODO 4.如果有，则在map中找到同类型的bean，并且赋值给相应属性。
 
-        return null;
+        return map;
     }
 
     /**
@@ -55,7 +55,7 @@ public class Application {
      * 注意，本方法只能扫描我们自己定义的类，而不能扫描jar里的类，如java.lang
      * @param packageName
      */
-     static public void scanElements(String packageName){
+     static public void scanElements(String packageName ,String annotationClazz){
         try {
             //Load the classLoader which loads this class.
             ClassLoader classLoader = Application.class.getClassLoader();
@@ -69,20 +69,43 @@ public class Application {
             File[] classes = folder.listFiles();
 
             int size = classes.length;
+//            System.out.println("size = "+size);
+
             List<Class<?>> classList = new ArrayList<Class<?>>();
 
             for(int i=0;i<size;i++){
+                //获取Component.class 点的位置 作用:截断字符串
+
                 int index = classes[i].getName().indexOf(".");
+
+//                System.out.println(classes[i].getName());
+//                System.out.println(index);
+
                 String className = classes[i].getName().substring(0, index);
+//                System.out.println(className);
+
                 String classNamePath = packageName+"."+className;
+
+//                System.out.println(classNamePath+" ------------->classNamePath");
                 Class<?> repoClass;
+
                 repoClass = Class.forName(classNamePath);
+                System.out.println(repoClass);
                 Annotation[] annotations = repoClass.getAnnotations();
+
+                System.out.println("annotations.length = "+ annotations.length);
                 for(int j =0;j<annotations.length;j++){
-                    System.out.println("Annotation in class "+repoClass.getName()+ " is "+annotations[j].annotationType().getName());
+
+//                    System.out.println(repoClass.getName());
+                    System.out.println("Annotation in class  "+repoClass.getName()+ "  is   "+annotations[j].annotationType().getName());
+                    System.out.println(" j = "+j);
+
                 }
+                System.out.println("i = "+ i);
                 classList.add(repoClass);
             }
+
+//            System.out.println(classList);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
