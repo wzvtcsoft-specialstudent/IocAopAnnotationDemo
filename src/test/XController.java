@@ -5,6 +5,7 @@ package test;
 public class XController {
 
    @Deprecated
+   @MySign
     private XService xService;
 
     public int add(int a, int b) {

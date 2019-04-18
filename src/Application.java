@@ -1,4 +1,5 @@
 import test.Component;
+import test.MySign;
 import test.XController;
 import test.XService;
 
@@ -18,9 +19,9 @@ public class Application {
 
     public static void main(String[] args) {
         //TODO IMPL 遍历所有装载的Class，找到有@Component的类。
-        scanElements("test","ss");
+//        scanElements("test","ss");
 
-        List<Field> fields=findFieldsInClassWithAnnotation(XController.class, Component.class);
+        List<Field> fields=findFieldsInClassWithAnnotation(XController.class, MySign.class);
         for(Field f:fields){
             //输出该字段的类型
             System.out.println(f.getName());
