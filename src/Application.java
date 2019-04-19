@@ -1,9 +1,11 @@
+import org.omg.CORBA.MARSHAL;
 import test.Component;
 import test.MySign;
 import test.XController;
 import test.XService;
 
 import java.io.File;
+import java.io.ObjectOutput;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.net.URL;
@@ -16,35 +18,58 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class Application {
 
     static Map<String ,Object>map=new HashMap<>();
+//    static Map<String,String >mapName=new HashMap<>();
 
     public static void main(String[] args) {
-        //TODO IMPL 遍历所有装载的Class，找到有@Component的类。
-//        scanElements("test","ss");
 
-        List<Field> fields=findFieldsInClassWithAnnotation(XController.class, MySign.class);
-        for(Field f:fields){
+//        scanElements("test");
+//        System.out.println(map.size());
+//        System.out.println( map.get("XService"));
+//
+//        XController xc=(XController)map.get("XController");
+//        System.out.println(xc.getxService());
+//
+//        int sum=xc.add(3,5);
+//        System.out.println(sum);
+//        List<Field> fields=findFieldsInClassWithAnnotation(XController.class, MySign.class);
+//        for(Field f:fields){
             //输出该字段的类型
-            System.out.println(f.getName());
+//            System.out.println(f.getName());
+//        }
+//        System.out.println();
+//        System.out.println(XController.class.getFields());
 
-        }
-//        System.out.println(fields);
-
-
-/*       XController xc=(XController)Application.getContext().get("XController");
+       XController xc=(XController)Application.getContext().get("XController");
 
         int sum=xc.add(3,5);
         System.out.println(sum);
-*/
+
 
     }
 
     private static Map<String,Object> getContext() {
-        //TODO 1.遍历所有装载的Class，找到有@Component的类。
-            scanElements("test","");
 
-        //TODO 2.实例化他们并放到一个Map中。
-
-        //TODO 3.检查所有的实例化类，看看他们是否有@Autowired属性，
+        scanElements("test");
+        for (Map.Entry<String ,Object> entry : map.entrySet()) {
+//            System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
+            Field[] fields = entry.getValue().getClass().getDeclaredFields();
+            for (Field f: fields) {
+                f.setAccessible(true);
+                if(f.isAnnotationPresent(MySign.class)){
+                    int index = f.getType().getName().indexOf(".");
+//                    System.out.println(index);
+                    String str = f.getType().getName().substring(index+1);
+                    Object oj= map.get(str);
+//                    System.out.println(map.get(f.getName()));
+                    try {
+                        f.set(entry.getValue(),oj);
+                        map.put(entry.getKey(),entry.getValue());
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
 
         //TODO 4.如果有，则在map中找到同类型的bean，并且赋值给相应属性。
 
@@ -56,7 +81,7 @@ public class Application {
      * 注意，本方法只能扫描我们自己定义的类，而不能扫描jar里的类，如java.lang
      * @param packageName
      */
-     static public void scanElements(String packageName ,String annotationClazz){
+     static public void scanElements(String packageName ){
         try {
             //Load the classLoader which loads this class.
             ClassLoader classLoader = Application.class.getClassLoader();
@@ -82,7 +107,9 @@ public class Application {
 //                System.out.println(classes[i].getName());
 //                System.out.println(index);
 
+                //这个包下所有的成员的SimpleName
                 String className = classes[i].getName().substring(0, index);
+
 //                System.out.println(className);
 
                 String classNamePath = packageName+"."+className;
@@ -90,19 +117,31 @@ public class Application {
 //                System.out.println(classNamePath+" ------------->classNamePath");
                 Class<?> repoClass;
 
+                //这个包下所有的成员全名
                 repoClass = Class.forName(classNamePath);
-                System.out.println(repoClass);
+
+                try {
+                    //如果成员前面的名字为class则将他的SimpleName作为key 将他的实例化作为Object 存入到全局的map中
+                    if(repoClass.toString().split(" ")[0].equals("class")) {
+                        map.put(className, repoClass.newInstance());
+//                        mapName.put(className,)
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+//               System.out.println(repoClass);
+
                 Annotation[] annotations = repoClass.getAnnotations();
 
-                System.out.println("annotations.length = "+ annotations.length);
+//                System.out.println("annotations.l ength = "+ annotations.length);
                 for(int j =0;j<annotations.length;j++){
 
 //                    System.out.println(repoClass.getName());
-                    System.out.println("Annotation in class  "+repoClass.getName()+ "  is   "+annotations[j].annotationType().getName());
-                    System.out.println(" j = "+j);
+//                    System.out.println("Annotation in class  "+repoClass.getName()+ "  is   "+annotations[j].annotationType().getName());
+//                    System.out.println(" j = "+j);
 
                 }
-                System.out.println("i = "+ i);
+//                System.out.println("i = "+ i);
                 classList.add(repoClass);
             }
 
@@ -118,16 +157,24 @@ public class Application {
      * @param annotationClazz
      * @return
      */
-    static public List<Field> findFieldsInClassWithAnnotation(Class targetClazz,Class annotationClazz){
-         List<Field> fields=new ArrayList<>();
+    static public boolean findFieldsInClassWithAnnotation(Class targetClazz,Class annotationClazz){
+
+        List<Field> fields=new ArrayList<>();
         for(Field field  : targetClazz.getDeclaredFields())
         {
-
+            field.setAccessible(true);
+            System.out.println(field);
+            for (Annotation annotation : field.getAnnotations()) {
+                System.out.println(annotation);
+            }
             if (field.isAnnotationPresent(annotationClazz))
             {
-                fields.add(field);
+//                fields.add(field);
+                return  true;
+//                System.out.println("add success");
             }
         }
-        return fields;
+        System.out.println(fields.size());
+        return false;
     }
 }
