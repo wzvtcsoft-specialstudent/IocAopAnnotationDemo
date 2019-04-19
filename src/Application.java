@@ -39,6 +39,9 @@ public class Application {
 //        System.out.println();
 //        System.out.println(XController.class.getFields());
 
+
+        
+
        XController xc=(XController)Application.getContext().get("XController");
 
         int sum=xc.add(3,5);
@@ -48,21 +51,31 @@ public class Application {
     }
 
     private static Map<String,Object> getContext() {
-
+        //扫描包下的类，并将该类实例化存入到map中
         scanElements("test");
+        //对存入实例的map进行遍历
         for (Map.Entry<String ,Object> entry : map.entrySet()) {
 //            System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
+            //获取所有的实例对象的Class 并获取私有字段
             Field[] fields = entry.getValue().getClass().getDeclaredFields();
+            //对私有字段进行遍历
             for (Field f: fields) {
+                //设置私有权限可写
                 f.setAccessible(true);
+                //判断该字段是否带有MySign.class 注解
                 if(f.isAnnotationPresent(MySign.class)){
+                    //找到字段的分隔符下标
                     int index = f.getType().getName().indexOf(".");
 //                    System.out.println(index);
+                    //分割字段，获取字段类型SimpleName ->+1因为 是点的下标，要从点的下一个字符开始合并
                     String str = f.getType().getName().substring(index+1);
+                    //从map中查询是否存在该实例
                     Object oj= map.get(str);
 //                    System.out.println(map.get(f.getName()));
                     try {
+                        //通过set方法设置该字段的属性
                         f.set(entry.getValue(),oj);
+                        //将这个key队应的Object进行覆盖，修改它本来为null的字段属性
                         map.put(entry.getKey(),entry.getValue());
                     } catch (IllegalAccessException e) {
                         e.printStackTrace();
@@ -70,8 +83,6 @@ public class Application {
                 }
             }
         }
-
-        //TODO 4.如果有，则在map中找到同类型的bean，并且赋值给相应属性。
 
         return map;
     }
